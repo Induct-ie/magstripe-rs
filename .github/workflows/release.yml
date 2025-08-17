@@ -35,17 +35,47 @@ jobs:
           fi
           echo "✓ Tag version matches Cargo.toml version: $CARGO_VERSION"
 
-  # Run the CI workflow first to ensure all tests pass
-  run-ci:
+  # Run CI checks to ensure all tests pass
+  check:
     name: Run CI Checks
     needs: validate-version
-    uses: ./.github/workflows/ci.yml
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt, clippy
+      
+      - name: Cache cargo registry and build
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            target
+          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-cargo-
+      
+      - name: Check formatting
+        run: cargo fmt --all -- --check
+      
+      - name: Run clippy
+        run: cargo clippy --all-targets --all-features -- -D warnings
+      
+      - name: Run tests
+        run: cargo test --verbose
+      
+      - name: Build documentation
+        run: cargo doc --no-deps --all-features
 
   # Publish to crates.io after CI passes
   publish:
     name: Publish to crates.io
     runs-on: ubuntu-latest
-    needs: [validate-version, run-ci]
+    needs: [validate-version, check]
     steps:
       - uses: actions/checkout@v5
       
@@ -75,7 +105,7 @@ jobs:
   create-release:
     name: Create Release
     runs-on: ubuntu-latest
-    needs: [validate-version, run-ci, publish]
+    needs: [validate-version, check, publish]
     permissions:
       contents: write
     steps:
