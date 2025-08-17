@@ -1,0 +1,98 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  # Validate that the tag version matches Cargo.toml version
+  validate-version:
+    name: Validate Version
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+    steps:
+      - uses: actions/checkout@v5
+      
+      - name: Get version from Cargo.toml
+        id: version
+        run: |
+          VERSION=$(grep "^version" Cargo.toml | head -1 | cut -d'"' -f2)
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "Cargo.toml version: $VERSION"
+      
+      - name: Check tag matches version
+        run: |
+          TAG_VERSION="${GITHUB_REF#refs/tags/v}"
+          CARGO_VERSION="${{ steps.version.outputs.version }}"
+          if [ "$TAG_VERSION" != "$CARGO_VERSION" ]; then
+            echo "Error: Tag version ($TAG_VERSION) does not match Cargo.toml version ($CARGO_VERSION)"
+            exit 1
+          fi
+          echo "✓ Tag version matches Cargo.toml version: $CARGO_VERSION"
+
+  # Run the CI workflow first to ensure all tests pass
+  run-ci:
+    name: Run CI Checks
+    needs: validate-version
+    uses: ./.github/workflows/ci.yml
+
+  # Publish to crates.io after CI passes
+  publish:
+    name: Publish to crates.io
+    runs-on: ubuntu-latest
+    needs: [validate-version, run-ci]
+    steps:
+      - uses: actions/checkout@v5
+      
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+      
+      - name: Cache cargo registry and build
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            target
+          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-cargo-
+      
+      - name: Verify package
+        run: cargo package --verbose
+      
+      - name: Publish to crates.io
+        run: cargo publish --token ${{ secrets.CARGO_REGISTRY_TOKEN }}
+        env:
+          CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}
+
+  # Create GitHub release with built artifacts
+  create-release:
+    name: Create Release
+    runs-on: ubuntu-latest
+    needs: [validate-version, run-ci, publish]
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v5
+      
+      - name: Download artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+      
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: ${{ github.ref }}
+          name: Release v${{ needs.validate-version.outputs.version }}
+          draft: false
+          prerelease: false
+          generate_release_notes: true
+          files: |
+            artifacts/**/*
