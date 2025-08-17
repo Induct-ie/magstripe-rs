@@ -1,3 +1,5 @@
+#![allow(clippy::uninlined_format_args)]
+
 use clap::Parser;
 use magstripe_rs::{BitStream, Decoder, Format};
 use std::process;

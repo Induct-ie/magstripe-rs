@@ -77,10 +77,10 @@ pub enum Format {
     ///
     /// Developed for the airline industry, uses 7-bit encoding (6 data bits
     /// + 1 odd parity bit) at 210 bpi density. Supports 64 alphanumeric
-    /// characters including A-Z, 0-9, and special symbols. Data starts
-    /// with `%` (start sentinel) and ends with `?` (end sentinel), followed
-    /// by an LRC. Characters are encoded LSB-first with ASCII offset of 32.
-    /// Maximum capacity: 79 characters including sentinels.
+    ///   characters including A-Z, 0-9, and special symbols. Data starts
+    ///   with `%` (start sentinel) and ends with `?` (end sentinel), followed
+    ///   by an LRC. Characters are encoded LSB-first with ASCII offset of 32.
+    ///   Maximum capacity: 79 characters including sentinels.
     Track1,
 
     /// Track 1 format with all bits inverted.

@@ -35,12 +35,12 @@ pub fn decode_custom(stream: &BitStream, spec: &FormatSpec) -> Result<String, De
         }
 
         // Check parity if required
-        if spec.parity != ParityType::None {
-            if !check_parity(char_bits, spec.bits_per_char, &spec.parity) {
-                return Err(DecoderError::ParityError {
-                    position: offset / spec.bits_per_char as usize,
-                });
-            }
+        if spec.parity != ParityType::None
+            && !check_parity(char_bits, spec.bits_per_char, &spec.parity)
+        {
+            return Err(DecoderError::ParityError {
+                position: offset / spec.bits_per_char as usize,
+            });
         }
 
         // Check for start sentinel
@@ -112,7 +112,7 @@ fn decode_custom_character(char_bits: u8, spec: &FormatSpec) -> Result<char, Dec
         7 => {
             // Track 1 style encoding
             let ascii_code = 0x20 + (data_bits & 0x3F);
-            if ascii_code >= 0x20 && ascii_code <= 0x5F {
+            if (0x20..=0x5F).contains(&ascii_code) {
                 Ok(ascii_code as char)
             } else {
                 Err(DecoderError::InvalidCharacter {

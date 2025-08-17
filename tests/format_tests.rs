@@ -1,3 +1,5 @@
+#![allow(clippy::uninlined_format_args)]
+
 use magstripe_rs::{BitStream, Decoder, Format};
 
 /// Helper function to convert a binary string to bytes
@@ -102,12 +104,10 @@ fn test_track1_formats() {
     let decoder = Decoder::new(&formats);
 
     // We expect this to fail, but it should attempt both formats
-    match decoder.decode(stream) {
-        Err(magstripe_rs::DecoderError::NoValidFormat { attempted }) => {
-            assert_eq!(attempted, 2);
-        }
-        _ => {} // If it somehow succeeds, that's fine too
+    if let Err(magstripe_rs::DecoderError::NoValidFormat { attempted }) = decoder.decode(stream) {
+        assert_eq!(attempted, 2);
     }
+    // If it somehow succeeds or fails differently, that's fine too
 }
 
 /// Test Track3 format
@@ -120,12 +120,10 @@ fn test_track3_format() {
     let decoder = Decoder::new(&[Format::Track3]);
 
     // We expect this to fail with random data
-    match decoder.decode(stream) {
-        Err(magstripe_rs::DecoderError::NoValidFormat { attempted }) => {
-            assert_eq!(attempted, 1);
-        }
-        _ => {} // If it somehow succeeds, that's fine too
+    if let Err(magstripe_rs::DecoderError::NoValidFormat { attempted }) = decoder.decode(stream) {
+        assert_eq!(attempted, 1);
     }
+    // If it somehow succeeds or fails differently, that's fine too
 }
 
 /// Test all Track2 variants

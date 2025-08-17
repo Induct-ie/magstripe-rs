@@ -100,7 +100,7 @@ fn decode_track1_character(data_bits: u8) -> Result<char, DecoderError> {
     let ascii_code = 0x20 + data_bits;
 
     // Check if it's a valid printable character
-    if ascii_code >= 0x20 && ascii_code <= 0x5F {
+    if (0x20..=0x5F).contains(&ascii_code) {
         Ok(ascii_code as char)
     } else {
         Err(DecoderError::InvalidCharacter {

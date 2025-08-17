@@ -1,3 +1,5 @@
+#![allow(clippy::uninlined_format_args)]
+
 use magstripe_rs::{BitStream, Decoder, Format};
 
 /// Test the user's actual card data that should decode as Track2Inverted
