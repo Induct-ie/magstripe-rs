@@ -71,13 +71,15 @@ match decoder.decode(stream) {
 ### Custom Format Specification
 
 ```rust
-use magstripe_rs::{Format, CustomSpec, Decoder, BitStream};
+use magstripe_rs::{Format, FormatSpec, ParityType, Decoder, BitStream};
 
-let custom = CustomSpec {
+let custom = FormatSpec {
     bits_per_char: 5,
     start_sentinel: Some(0b11010),
     end_sentinel: Some(0b11111),
-    char_map: None, // Use default numeric mapping
+    lsb_first: true,
+    parity: ParityType::Odd,
+    inverted: false,
 };
 
 let decoder = Decoder::new(&[Format::Custom(custom)]);
@@ -199,6 +201,8 @@ cargo test test_track2_inverted_decode
 ### Decoding a Real Card
 
 ```rust
+use magstripe_rs::{BitStream, Decoder, Format};
+
 // Example: Card that reads as inverted Track 2
 let data = vec![255, 255, 255, 151, 222, 246, 253, 190, 141, 247, 7, 127, 255, 255, 255, 255, 192];
 let stream = BitStream::new(&data, 130).unwrap();
@@ -212,6 +216,10 @@ assert_eq!(output.data, "0004048712");
 ### Handling Unknown Formats
 
 ```rust
+use magstripe_rs::{BitStream, Decoder, Format, DecoderError};
+
+# let data = vec![255, 255, 255, 151, 222, 246, 253, 190, 141, 247, 7, 127, 255, 255, 255, 255, 192];
+# let stream = BitStream::new(&data, 130).unwrap();
 // Try all common formats
 let formats = vec![
     Format::Track1,
