@@ -1,13 +1,19 @@
 [package]
 name = "magstripe-rs"
 version = "0.1.0"
-edition = "2024"
+edition = "2021"
+rust-version = "1.73.0"
 authors = [
   "Samir Bioud <samir@induct.ie>"
 ]
-license = "MPL-v2.0"
-
-description = "Magstripe bitstream decoder for Rust"
+license = "MPL-2.0"
+description = "Magnetic stripe card data decoder library and CLI tool"
+repository = "https://github.com/Induct-ie/magstripe-rs"
+homepage = "https://github.com/Induct-ie/magstripe-rs"
+documentation = "https://docs.rs/magstripe-rs"
+readme = "README.md"
+keywords = ["magnetic-stripe", "card-reader", "decoder", "track-data", "iso7811"]
+categories = ["encoding", "parser-implementations", "command-line-utilities"]
 
 [[bin]]
 name = "magstripe-decode"

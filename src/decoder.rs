@@ -1,8 +1,8 @@
+mod common;
+mod custom;
 mod track1;
 mod track2;
 mod track3;
-mod custom;
-mod common;
 
 use crate::{BitStream, DecoderError, DecoderOutput, Format};
 use tracing::{debug, trace, warn};
@@ -17,11 +17,14 @@ pub fn decode_with_formats<'a>(
         warn!("No formats provided for decoding");
         return Err(DecoderError::NoFormatsProvided);
     }
-    
-    debug!("Starting decode with {} formats, bitstream length: {} bits", 
-           formats.len(), stream.len());
+
+    debug!(
+        "Starting decode with {} formats, bitstream length: {} bits",
+        formats.len(),
+        stream.len()
+    );
     trace!("Bitstream: {:?}", stream);
-    
+
     // Try each format in order
     for format in formats {
         debug!("Trying format: {:?}", format);
@@ -37,7 +40,7 @@ pub fn decode_with_formats<'a>(
             }
         }
     }
-    
+
     // None of the formats worked
     warn!("Failed to decode with any of {} formats", formats.len());
     Err(DecoderError::NoValidFormat {
@@ -53,14 +56,16 @@ fn try_decode_format(format: &Format, stream: &BitStream) -> Result<String, Deco
         Format::Track2MSB => track2::decode_track2(stream, false, false, false, false, false),
         Format::Track2LSB => track2::decode_track2(stream, false, true, false, false, false),
         Format::Track2Raw => track2::decode_track2(stream, false, true, true, false, false),
-        Format::Track2SwappedParity => track2::decode_track2(stream, false, true, false, true, false),
+        Format::Track2SwappedParity => {
+            track2::decode_track2(stream, false, true, false, true, false)
+        }
         Format::Track2EvenParity => track2::decode_track2(stream, false, true, false, false, true),
-        
+
         Format::Track1 => track1::decode_track1(stream, false),
         Format::Track1Inverted => track1::decode_track1(stream, true),
-        
+
         Format::Track3 => track3::decode_track3(stream),
-        
+
         Format::Custom(spec) => custom::decode_custom(stream, spec),
     }
 }

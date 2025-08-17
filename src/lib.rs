@@ -1,4 +1,5 @@
 #![doc = include_str!("../README.md")]
+#![allow(clippy::uninlined_format_args)]
 
 mod bitstream;
 mod decoder;
@@ -64,7 +65,7 @@ pub enum Format {
     /// placed in a different position within the 5-bit character, which
     /// can occur due to encoding errors or non-standard implementations.
     Track2SwappedParity,
-    
+
     /// Track 2 format with even parity instead of odd.
     ///
     /// While standard Track 2 uses odd parity, some non-standard
@@ -216,9 +217,9 @@ impl<'formats> Decoder<'formats> {
     pub fn new(attempt_formats: &'formats [Format]) -> Self {
         Self { attempt_formats }
     }
-    
+
     /// Decode a bitstream using the configured formats
-    /// 
+    ///
     /// This will try each format in order until one succeeds, returning
     /// the decoded data and a reference to the successful format.
     /// If no format succeeds, returns an error indicating the failure.

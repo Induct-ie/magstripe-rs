@@ -1,5 +1,5 @@
-use crate::{BitStream, DecoderError};
 use super::track2::decode_track2;
+use crate::{BitStream, DecoderError};
 
 /// Decode Track 3 format
 /// Track 3 uses the same encoding as Track 2 (5-bit) but at higher density (210 bpi vs 75 bpi)
