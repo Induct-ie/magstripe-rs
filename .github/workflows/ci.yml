@@ -24,7 +24,7 @@ jobs:
           components: rustfmt, clippy
       
       - name: Cache cargo registry and build
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: |
             ~/.cargo/registry
@@ -60,7 +60,7 @@ jobs:
         uses: dtolnay/rust-toolchain@stable
       
       - name: Cache cargo registry and build
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: |
             ~/.cargo/registry
@@ -98,7 +98,7 @@ jobs:
           targets: ${{ matrix.target }}
       
       - name: Cache cargo registry and build
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: |
             ~/.cargo/registry
