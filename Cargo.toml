@@ -20,7 +20,7 @@ name = "magstripe-decode"
 path = "src/bin/magstripe-decode.rs"
 
 [dependencies]
-thiserror = "2.0.15"
+thiserror = "2.0.16"
 tracing = "0.1"
 clap = { version = "4.5", features = ["derive"] }
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
