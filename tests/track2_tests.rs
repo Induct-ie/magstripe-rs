@@ -8,20 +8,9 @@ fn test_decode_track2_weird(){
 
     let stream = BitStream::new(&payload, 116).unwrap();
 
-    debug!("========= Decoding track2");
-    let decoded1 = decode_track2(&stream, false, false, false, false, false);
-    debug!("========= Decoded: {decoded1:?}");
-    debug!("========= Decoding track2 inverted");
-    let decoded2 = decode_track2(&stream, true, false, false, false, false);
-    debug!("========= Decoded: {decoded2:?}");
-    debug!("========= Decoding track2 lsb first");
-    let decoded3 = decode_track2(&stream, false, true, false, false, false);
-    debug!("========= Decoded: {decoded3:?}");
-    debug!("========= Decoding track2 inverted lsb first");
-    let decoded4 = decode_track2(&stream, true, true, false, false, false);
-    debug!("========= Decoded: {decoded4:?}");
+    let decoded = decode_track2(&stream, true, true, false, false, false);
 
-    panic!("Decoded:\n (not inverted, msb first) {decoded1:?}\n (inverted, msb first) {decoded2:?}\n (not inverted, lsb first) {decoded3:?}\n (inverted, lsb first) {decoded4:?}");
+    assert_eq!(decoded, Ok("0100231132".to_string()));
 }
 
 #[test_log::test]
@@ -35,14 +24,4 @@ fn test_decode_track2_dogpatch_normal(){
     debug!("========= Decoded: {decoded:?}");
 
     assert_eq!(decoded, Ok("0005721443".to_string()));
-}
-
-#[test_log::test]
-fn test_decode_track2_dogpatch_weird(){
-    let payload = vec![255, 255, 255, 187, 247, 223, 125, 189, 182, 237, 247, 125, 253, 255, 255, 255, 255, 255, 224];
-
-    let stream = BitStream::new(&payload, 147).unwrap();
-
-    let decoded = decode_track2(&stream, true, true, false, false, false);
-    panic!("========= Decoded: {decoded:?}");
 }
