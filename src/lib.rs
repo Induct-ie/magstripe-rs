@@ -2,7 +2,7 @@
 #![allow(clippy::uninlined_format_args)]
 
 mod bitstream;
-mod decoder;
+pub mod decoder;
 
 pub use bitstream::{BitStream, BitStreamError};
 
@@ -152,7 +152,7 @@ pub struct DecoderOutput<'a> {
 }
 
 /// Errors that can occur during magnetic stripe decoding.
-#[derive(Debug, Clone, thiserror::Error)]
+#[derive(Debug, Clone, thiserror::Error, PartialEq)]
 pub enum DecoderError {
     /// No formats were provided to attempt decoding.
     #[error("No formats provided for decoding")]

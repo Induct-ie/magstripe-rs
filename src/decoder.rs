@@ -7,6 +7,8 @@ mod track3;
 use crate::{BitStream, DecoderError, DecoderOutput, Format};
 use tracing::{debug, trace, warn};
 
+pub use track2::decode_track2;
+
 /// Main decode implementation that tries each format
 pub fn decode_with_formats<'a>(
     formats: &'a [Format],

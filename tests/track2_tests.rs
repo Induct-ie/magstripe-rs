@@ -31,10 +31,10 @@ fn test_decode_track2_dogpatch_normal(){
 
     let stream = BitStream::new(&payload, 130).unwrap();
 
-    let decoded = decode_track2(&stream, true, false, false, false, false);
+    let decoded = decode_track2(&stream, true, true, false, false, false);
     debug!("========= Decoded: {decoded:?}");
 
-    panic!("Decoded: {decoded:?}");
+    assert_eq!(decoded, Ok("0005721443".to_string()));
 }
 
 #[test_log::test]
@@ -43,6 +43,6 @@ fn test_decode_track2_dogpatch_weird(){
 
     let stream = BitStream::new(&payload, 147).unwrap();
 
-    let decoded = decode_track2(&stream, true, false, false, false, false);
+    let decoded = decode_track2(&stream, true, true, false, false, false);
     panic!("========= Decoded: {decoded:?}");
 }
