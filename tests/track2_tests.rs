@@ -1,10 +1,12 @@
-use magstripe_rs::{BitStream, decoder::decode_track2};
+use magstripe_rs::{decoder::decode_track2, BitStream};
 use tracing::debug;
 
 #[test_log::test]
-fn test_decode_track2_weird(){
+fn test_decode_track2_weird() {
     // We encountered this payload in the Academy Building, Park West off of a vanderbilt nfc reader
-    let payload = vec![255, 255, 255, 229, 243, 253, 235, 153, 239, 53, 192, 175, 255, 255, 240];
+    let payload = vec![
+        255, 255, 255, 229, 243, 253, 235, 153, 239, 53, 192, 175, 255, 255, 240,
+    ];
 
     let stream = BitStream::new(&payload, 116).unwrap();
 
@@ -14,9 +16,11 @@ fn test_decode_track2_weird(){
 }
 
 #[test_log::test]
-fn test_decode_track2_dogpatch_normal(){
+fn test_decode_track2_dogpatch_normal() {
     // Dogpatch fob - should decode as 0005721443
-    let payload = vec![255, 255, 255, 151, 222, 242, 135, 119, 239, 102, 4, 191, 255, 255, 255, 255, 192];
+    let payload = vec![
+        255, 255, 255, 151, 222, 242, 135, 119, 239, 102, 4, 191, 255, 255, 255, 255, 192,
+    ];
 
     let stream = BitStream::new(&payload, 130).unwrap();
 

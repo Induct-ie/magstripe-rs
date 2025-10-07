@@ -1,29 +1,32 @@
-use super::common::{
-    calculate_lrc_track2, check_parity, extract_bits,
-};
+use super::common::{calculate_lrc_track2, check_parity, extract_bits};
 use crate::{decoder::common::calculate_lrc_track1, BitStream, DecoderError, ParityType};
 use tracing::{debug, trace};
 
 const TRACK2_START_SENTINEL: u8 = 0b01011; // ';'
-const TRACK2_END_SENTINEL:   u8 = 0b11111; // '?'
+const TRACK2_END_SENTINEL: u8 = 0b11111; // '?'
 
 #[inline]
 fn bitrev5(v: u8) -> u8 {
     // reverse the low 5 bits
-    ((v & 0b00001) << 4) |
-    ((v & 0b00010) << 2) |
-    ( v & 0b00100)       |
-    ((v & 0b01000) >> 2) |
-    ((v & 0b10000) >> 4)
+    ((v & 0b00001) << 4)
+        | ((v & 0b00010) << 2)
+        | (v & 0b00100)
+        | ((v & 0b01000) >> 2)
+        | ((v & 0b10000) >> 4)
 }
 
 ///
 /// Read a 5-bit character from the stream
-/// 
+///
 /// Returns the character bits if successful, None if the stream is too short
-/// 
+///
 #[inline]
-fn read_char5(stream: &BitStream, off: usize, lsb_first_on_wire: bool, inverted: bool) -> Option<u8> {
+fn read_char5(
+    stream: &BitStream,
+    off: usize,
+    lsb_first_on_wire: bool,
+    inverted: bool,
+) -> Option<u8> {
     // Always grab with the LSB-accumulating extractor
     let mut v = extract_bits(stream, off, 5)?;
     // If wire is MSB-first, reverse to canonical dddd p
@@ -36,8 +39,6 @@ fn read_char5(stream: &BitStream, off: usize, lsb_first_on_wire: bool, inverted:
     Some(v & 0x1F) // canonical: data in bits 0..3, parity in bit 4
 }
 
-
-
 /// Decode Track 2 format with various options
 pub fn decode_track2(
     stream: &BitStream,
@@ -48,7 +49,7 @@ pub fn decode_track2(
     even_parity: bool,
 ) -> Result<String, DecoderError> {
     debug!("Decoding Track 2 with inverted: {}, lsb_first: {}, no_sentinels: {}, swapped_parity: {}, even_parity: {}", inverted, lsb_first, no_sentinels, swapped_parity, even_parity);
-    
+
     // Track 2 uses 5-bit characters
     const BITS_PER_CHAR: u8 = 5;
 
@@ -69,14 +70,13 @@ pub fn decode_track2(
     if !found_start {
         let mut search_offset = 0;
         while search_offset + BITS_PER_CHAR as usize <= stream.len() {
-
-            
             // Extract character bits
-            let char_bits = read_char5(stream, search_offset, lsb_first, inverted)
-            .ok_or(DecoderError::BitstreamTooShort {
-                bit_count: stream.len(),
-                minimum_required: search_offset + BITS_PER_CHAR as usize,
-            })?;
+            let char_bits = read_char5(stream, search_offset, lsb_first, inverted).ok_or(
+                DecoderError::BitstreamTooShort {
+                    bit_count: stream.len(),
+                    minimum_required: search_offset + BITS_PER_CHAR as usize,
+                },
+            )?;
 
             // Check for start sentinel
             if char_bits == TRACK2_START_SENTINEL {
@@ -89,10 +89,10 @@ pub fn decode_track2(
                 offset = search_offset + BITS_PER_CHAR as usize;
                 break;
             }
-            
+
             search_offset += 1; // Check every single bit position
         }
-        
+
         if !found_start {
             return Err(DecoderError::InvalidStartSentinel);
         }
@@ -100,7 +100,10 @@ pub fn decode_track2(
 
     // Debug: Print the remaining stream length and data
     debug!("Remaining stream length: {}", stream.len() - offset);
-    debug!("Remaining stream data: {:?}", stream.buffer()[offset/8..].to_vec());
+    debug!(
+        "Remaining stream data: {:?}",
+        stream.buffer()[offset / 8..].to_vec()
+    );
 
     // Process the stream - now that we found the start sentinel
     while offset <= stream.len() - BITS_PER_CHAR as usize {
@@ -108,13 +111,12 @@ pub fn decode_track2(
         debug!("Offset: {}", offset);
 
         // Extract character bits
-        let char_bits = read_char5(stream, offset, lsb_first, inverted)
-        .ok_or(DecoderError::BitstreamTooShort {
-            bit_count: stream.len(),
-            minimum_required: offset + BITS_PER_CHAR as usize,
-        })?;
-    
-        
+        let char_bits = read_char5(stream, offset, lsb_first, inverted).ok_or(
+            DecoderError::BitstreamTooShort {
+                bit_count: stream.len(),
+                minimum_required: offset + BITS_PER_CHAR as usize,
+            },
+        )?;
 
         // Debug: Print the character bits
         debug!("Character bits: {:05b}", char_bits);
@@ -150,11 +152,12 @@ pub fn decode_track2(
             // Read LRC character
             offset += BITS_PER_CHAR as usize;
             if offset + BITS_PER_CHAR as usize <= stream.len() {
-                let lrc_bits = read_char5(stream, offset, lsb_first, inverted)
-                .ok_or(DecoderError::BitstreamTooShort {
-                    bit_count: stream.len(),
-                    minimum_required: offset + BITS_PER_CHAR as usize,
-                })?;
+                let lrc_bits = read_char5(stream, offset, lsb_first, inverted).ok_or(
+                    DecoderError::BitstreamTooShort {
+                        bit_count: stream.len(),
+                        minimum_required: offset + BITS_PER_CHAR as usize,
+                    },
+                )?;
 
                 // Verify LRC
                 // If the line is inverted, we need to invert the LRC bits to match the parity
@@ -179,7 +182,6 @@ pub fn decode_track2(
 
         offset += BITS_PER_CHAR as usize;
     }
-
 
     if result.is_empty() {
         return Err(DecoderError::NoValidFormat { attempted: 1 });
