@@ -1,5 +1,5 @@
 use super::common::{calculate_lrc_track2, check_parity, extract_bits};
-use crate::{decoder::common::calculate_lrc_track1, BitStream, DecoderError, ParityType};
+use crate::{BitStream, DecoderError, ParityType};
 use tracing::{debug, trace};
 
 const TRACK2_START_SENTINEL: u8 = 0b01011; // ';'
