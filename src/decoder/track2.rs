@@ -106,7 +106,7 @@ pub fn decode_track2(
     );
 
     // Process the stream - now that we found the start sentinel
-    while offset <= stream.len() - BITS_PER_CHAR as usize {
+    while offset + BITS_PER_CHAR as usize <= stream.len() {
         // Debug: Print the offset
         debug!("Offset: {}", offset);
 

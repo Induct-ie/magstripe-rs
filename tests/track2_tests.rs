@@ -29,3 +29,13 @@ fn test_decode_track2_dogpatch_normal() {
 
     assert_eq!(decoded, Ok("0005721443".to_string()));
 }
+
+#[test_log::test]
+fn test_decode_track2_dogpatch_weird(){
+    let payload = vec![255, 255, 255, 187, 247, 223, 125, 189, 182, 237, 247, 125, 253, 255, 255, 255, 255, 255, 224];
+
+    let stream = BitStream::new(&payload, 147).unwrap();
+
+    let decoded = decode_track2(&stream, false, true, false, false, false);
+    panic!("========= Decoded: {decoded:?}");
+}
