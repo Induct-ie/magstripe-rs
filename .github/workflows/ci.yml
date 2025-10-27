@@ -116,7 +116,7 @@ jobs:
         run: cargo build --release --bin magstripe-decode --target ${{ matrix.target }}
       
       - name: Upload binary artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: magstripe-decode-${{ matrix.target }}
           path: target/${{ matrix.target }}/release/${{ matrix.binary_name }}
